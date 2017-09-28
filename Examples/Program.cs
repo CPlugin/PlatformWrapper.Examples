@@ -7,32 +7,20 @@ using NLog;
 
 namespace Examples
 {
-    class Program
+    public class BasicExamples
     {
-        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
-
-        private const string Server = "127.0.0.1:1443";
-        private const int Login = 1;
-        private const string Password = "Manager";
-
-        static int Main(string[] args)
-        {
-            Log.Info("--=[ Started ]=--");
-
-            //return (int)Connect();
-            return (int) OpenTrade();
-        }
+        protected static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         /// <summary>
         /// Simple demonstration of connection process
         /// </summary>
         /// <returns></returns>
-        private static ResultCode Connect()
+        public static ResultCode Connect()
         {
             ResultCode result;
 
             // create instance
-            var mgr = new ManagerPumpEx(Server, Login, Password)
+            var mgr = new ManagerPumpEx(Constants.Server, Constants.Login, Constants.Password)
             {
                 Logger = (ctx, type, message, exception) =>
                 {
@@ -66,13 +54,13 @@ namespace Examples
         /// Demonstration of new order opening process using regular and pumping connection simultaneously
         /// </summary>
         /// <returns></returns>
-        private static ResultCode OpenTrade()
+        public static ResultCode OpenTrade()
         {
             ResultCode result;
 
             var prices = new Dictionary<string, SymbolInfo>();
 
-            var mgr = new Manager(Server, Login, Password);
+            var mgr = new Manager(Constants.Server, Constants.Login, Constants.Password);
             Log.Trace("Connect...");
             result = mgr.Connect();
             Log.Trace($"Connect result: {result}");
@@ -83,7 +71,7 @@ namespace Examples
                 return result;
 
             // create instance
-            var pump = new ManagerPumpEx(Server, Login, Password)
+            var pump = new ManagerPumpEx(Constants.Server, Constants.Login, Constants.Password)
             {
                 Logger = (ctx, type, message, exception) =>
                 {
@@ -118,6 +106,7 @@ namespace Examples
 
             try
             {
+                // await for prices
                 do
                 {
                     Thread.Sleep(100);

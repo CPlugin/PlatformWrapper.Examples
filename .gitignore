@@ -246,11 +246,7 @@ paket-files/
 
 # FAKE - F# Make
 .fake/
-<<<<<<< cc384fa9eb1b73f4511f829ebc67d89cc4993044
-
-# JetBrains Rider
-.idea/
-*.sln.iml
-=======
 *.tss
->>>>>>> d6346130a858c433cc6d9c2d5cda584d25ac216e
+
+.vs/
+.vscode/
