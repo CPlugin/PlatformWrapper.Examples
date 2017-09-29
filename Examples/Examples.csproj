@@ -37,13 +37,11 @@
       <HintPath>..\packages\CPlugin.Common.1.0.6.74\lib\net451\CPlugin.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="CPlugin.PlatformWrapper.MetaTrader4, Version=4.1045.0.19, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CPlugin.PlatformWrapper.MetaTrader4.4.1045.0.19\lib\net452\CPlugin.PlatformWrapper.MetaTrader4.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="CPlugin.PlatformWrapper.MetaTrader4, Version=4.1045.2.5, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\CPlugin.PlatformWrapper.MetaTrader4.4.1045.2.5\lib\net452\CPlugin.PlatformWrapper.MetaTrader4.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.10.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="NLog, Version=5.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
       <HintPath>..\packages\NLog.5.0.0-beta05\lib\net45\NLog.dll</HintPath>
@@ -56,8 +54,10 @@
   <ItemGroup>
     <Compile Include="App.cs" />
     <Compile Include="Constants.cs" />
-    <Compile Include="ManagerPollExamples.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="Dealer\Basic.cs" />
+    <Compile Include="Pool\LongRunning.cs" />
+    <Compile Include="Pool\Basic100Threads.cs" />
+    <Compile Include="PumpEx\ManagerPumpExExamples.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -67,6 +67,7 @@
     </None>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

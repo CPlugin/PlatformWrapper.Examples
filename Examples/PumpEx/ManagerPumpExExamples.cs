@@ -5,9 +5,9 @@ using CPlugin.PlatformWrapper.MetaTrader4.Classes;
 using CPlugin.PlatformWrapper.MetaTrader4.Enums;
 using NLog;
 
-namespace Examples
+namespace Examples.PumpEx
 {
-    public class BasicExamples
+    public class Basic
     {
         protected static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
@@ -28,10 +28,18 @@ namespace Examples
                         Log.Error(exception);
                     else
                         Log.Info($"[{type}] {message}");
-                },
-                OnStart = sender => { Log.Info("Pumping started"); },
-                OnStop = sender => { Log.Info("Pumping stopped"); }
+                }
             };
+
+            mgr.Start += sender =>
+            {
+                Log.Info("Pumping started");
+            };
+            mgr.Stop += sender =>
+            {
+                Log.Info("Pumping stopped");
+            };
+
 
             Log.Trace("Connect...");
             result = mgr.Connect();
@@ -79,23 +87,25 @@ namespace Examples
                         Log.Error(exception);
                     else
                         Log.Info($"[{type}] {message}");
-                },
-                OnStart = sender => { Log.Info("Pumping started"); },
-                OnStop = sender => { Log.Info("Pumping stopped"); },
-                OnBidAsk = sender =>
-                {
-                    lock (prices)
-                    {
-                        // get last received quotes
-                        foreach (var pi in sender.SymbolInfoUpdated())
-                        {
-                            // Debug.Print($"{DateTime.Now} - {pi.Key}, {pi.Value.Bid}");
+                }
+            };
 
-                            prices[pi.Key] = pi.Value;
-                        }
+            pump.Start += sender => { Log.Info("Pumping started"); };
+            pump.Stop += sender => { Log.Info("Pumping stopped"); };
+            pump.BidAsk += sender =>
+            {
+                lock (prices)
+                {
+                    // get last received quotes
+                    foreach (var pi in sender.SymbolInfoUpdated())
+                    {
+                        // Debug.Print($"{DateTime.Now} - {pi.Key}, {pi.Value.Bid}");
+
+                        prices[pi.Key] = pi.Value;
                     }
                 }
             };
+
 
             Log.Trace("Connect...");
             result = pump.Connect();

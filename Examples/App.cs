@@ -1,3 +1,4 @@
+using System;
 using CPlugin.PlatformWrapper.MetaTrader4.Enums;
 using NLog;
 
@@ -12,10 +13,26 @@ namespace Examples
             Log.Info("--=[ Started ]=--");
 
             var res = ResultCode.OkNone;
+            
+            //Pool.Basic100Threads.GetUsers();
 
-            //res = BasicExamples.OpenTrade();
+            //new Pool.LongRunning().Go();
 
-            ManagerPollExamples.GetUsers();
+            var d = new Dealer.Basic();
+            d.Go();
+
+            while (true)
+            {
+                if (Console.KeyAvailable)
+                {
+                    var kki = Console.ReadKey(true);
+                    if (kki.Key == ConsoleKey.Q)
+                    {
+                        d.Stop();
+                        break;
+                    }
+                }
+            }
 
             return (int)res;
         }
