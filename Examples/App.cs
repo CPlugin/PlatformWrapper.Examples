@@ -14,12 +14,16 @@ namespace Examples
 
             var res = ResultCode.OkNone;
             
+            // Examples:
+
             //Pool.Basic100Threads.GetUsers();
+            
+            var d = new Pool.LongRunning();
+            //var d = new Dealer.Basic();
 
-            //new Pool.LongRunning().Go();
 
-            var d = new Dealer.Basic();
             d.Go();
+
 
             while (true)
             {

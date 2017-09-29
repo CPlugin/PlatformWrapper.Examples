@@ -9,10 +9,14 @@ namespace Examples.Pool
     public class LongRunning
     {
         const int ThreadsCount = 2;
+        readonly Task[] _tasks = new Task[ThreadsCount];
         readonly ManualResetEvent _eventStop = new ManualResetEvent(false);
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         public void Go()
         {
+            Log.Info("Started");
+
             var pool = new ManagerPool(Constants.Server, Constants.Login, Constants.Password)
             {
                 Logger = Extensions.LogToConsole
@@ -20,16 +24,10 @@ namespace Examples.Pool
 
             // very important step to run pool
             pool.Run();
-
-            var tasks = new Task[ThreadsCount];
-
-            var log = LogManager.GetCurrentClassLogger();
-            log.Info("Started");
-
-
+            
             for (int i = 0; i < ThreadsCount; ++i)
             {
-                tasks[i] = new Task(a =>
+                _tasks[i] = new Task(a =>
                 {
                     do
                     {
@@ -66,12 +64,17 @@ namespace Examples.Pool
                         }
                     } while (false == _eventStop.WaitOne(TimeSpan.FromMinutes(1)));
                 }, i);
-                tasks[i].Start();
+                _tasks[i].Start();
             }
-            log.Info("All tasks started");
+            Log.Info("All tasks started");
+        }
 
-            Task.WaitAll(tasks, TimeSpan.FromHours(1));
-            log.Info("All tasks completed");
+        public void Stop()
+        {
+            _eventStop.Set();
+
+            Task.WaitAll(_tasks, TimeSpan.FromSeconds(10));
+            Log.Info("All tasks completed");
         }
     }
 }
