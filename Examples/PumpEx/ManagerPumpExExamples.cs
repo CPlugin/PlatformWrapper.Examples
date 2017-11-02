@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using CPlugin.PlatformWrapper.MetaTrader4;
 using CPlugin.PlatformWrapper.MetaTrader4.Classes;
@@ -22,6 +23,7 @@ namespace Examples.PumpEx
             // create instance
             var mgr = new ManagerPumpEx(Constants.Server, Constants.Login, Constants.Password)
             {
+                PumpingFlags = PumpingFlags.HideNews | PumpingFlags.HideMail,
                 Logger = (ctx, type, message, exception) =>
                 {
                     if (exception != null)
@@ -47,6 +49,18 @@ namespace Examples.PumpEx
 
             if (result != ResultCode.Ok)
                 return result;
+
+            // (optional) wait until pumping connection is up to step forward with 'Get*' functions
+            if(mgr.Await(PumpingCode.StartPumping, TimeSpan.FromSeconds(5)) == null)
+            {
+                Log.Error($"There is not connection to MT4");
+                return ResultCode.NoConnect;
+            }
+
+            // be sure pumping mode activated and all data get synchronized ebfore call any functions
+
+            if((result = mgr.SymbolGet("EURUSD", out var cs)) != ResultCode.Ok)
+                Log.Error($"Error gettings symnbol info: {result}");
 
             // simulate long running
             Thread.Sleep(5000);
