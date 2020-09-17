@@ -55,6 +55,7 @@
     <Compile Include="App.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Dealer\Basic.cs" />
+    <Compile Include="ManagerDemos\ManagerDemo.cs" />
     <Compile Include="Pool\LongRunning.cs" />
     <Compile Include="Pool\Basic100Threads.cs" />
     <Compile Include="PumpEx\ManagerPumpExExamples.cs" />
@@ -67,7 +68,6 @@
     </None>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

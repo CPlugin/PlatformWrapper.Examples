@@ -1,5 +1,6 @@
 using System;
 using CPlugin.PlatformWrapper.MetaTrader4.Enums;
+using Examples.ManagerDemos;
 using NLog;
 
 namespace Examples
@@ -13,14 +14,14 @@ namespace Examples
             Log.Info("--=[ Started ]=--");
 
             var res = ResultCode.OkNone;
-            
+
             // Examples:
 
             //Pool.Basic100Threads.GetUsers();
-            
-            var d = new Pool.LongRunning();
-            //var d = new Dealer.Basic();
 
+            //var d = new Pool.LongRunning();
+            //var d = new Dealer.Basic();
+            var d = new Basic();
 
             d.Go();
 
