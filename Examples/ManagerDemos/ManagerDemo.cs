@@ -11,16 +11,16 @@ namespace Examples.ManagerDemos
 
         public void Go()
         {
-            mgr = new Manager(Constants.Server, Constants.Login, Constants.Password)
-            {
-                Logger = (ctx, type, message, exception) =>
-                {
-                    if (exception != null)
-                        Log.Error(exception);
-                    else
-                        Log.Info($"[{type}] {message}");
-                }
-            };
+            mgr = new Manager(Constants.Server,
+                              Constants.Login,
+                              Constants.Password,
+                              (ctx, type, message, exception) =>
+                              {
+                                  if (exception != null)
+                                      Log.Error(exception);
+                                  else
+                                      Log.Info($"[{type}] {message}");
+                              }) { };
 
             Log.Info("Connect...");
             var result = mgr.Connect();
@@ -36,6 +36,8 @@ namespace Examples.ManagerDemos
             if (result != ResultCode.Ok)
                 return;
 
+            var bResult = mgr.UsersRequest(out var users);
+            Log.Info($"UsersRequest result: {bResult}, {users.Count} users found");
             // etc
         }
 

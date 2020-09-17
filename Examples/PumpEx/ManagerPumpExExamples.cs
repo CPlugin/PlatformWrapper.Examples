@@ -21,22 +21,25 @@ namespace Examples.PumpEx
             ResultCode result;
 
             // create instance
-            var mgr = new ManagerPumpEx(Constants.Server, Constants.Login, Constants.Password)
+            var mgr = new ManagerPumpEx(Constants.Server,
+                                        Constants.Login,
+                                        Constants.Password,
+                                        (ctx, type, message, exception) =>
+                                        {
+                                            if (exception != null)
+                                                Log.Error(exception);
+                                            else
+                                                Log.Info($"[{type}] {message}");
+                                        })
             {
                 PumpingFlags = PumpingFlags.HideNews | PumpingFlags.HideMail,
-                Logger = (ctx, type, message, exception) =>
-                {
-                    if (exception != null)
-                        Log.Error(exception);
-                    else
-                        Log.Info($"[{type}] {message}");
-                }
             };
 
             mgr.Start += sender =>
             {
                 Log.Info("Pumping started");
             };
+
             mgr.Stop += sender =>
             {
                 Log.Info("Pumping stopped");
@@ -51,7 +54,7 @@ namespace Examples.PumpEx
                 return result;
 
             // (optional) wait until pumping connection is up to step forward with 'Get*' functions
-            if(mgr.Await(PumpingCode.StartPumping, TimeSpan.FromSeconds(5)) == null)
+            if (mgr.Await(PumpingCode.StartPumping, TimeSpan.FromSeconds(5)) == null)
             {
                 Log.Error($"There is not connection to MT4");
                 return ResultCode.NoConnect;
@@ -59,7 +62,7 @@ namespace Examples.PumpEx
 
             // be sure pumping mode activated and all data get synchronized ebfore call any functions
 
-            if((result = mgr.SymbolGet("EURUSD", out var cs)) != ResultCode.Ok)
+            if ((result = mgr.SymbolGet("EURUSD", out var cs)) != ResultCode.Ok)
                 Log.Error($"Error gettings symnbol info: {result}");
 
             // simulate long running
@@ -82,30 +85,46 @@ namespace Examples.PumpEx
 
             var prices = new Dictionary<string, SymbolInfo>();
 
-            var mgr = new Manager(Constants.Server, Constants.Login, Constants.Password);
+            var mgr = new Manager(Constants.Server,
+                                  Constants.Login,
+                                  Constants.Password,
+                                  (ctx, type, message, exception) =>
+                                  {
+                                      if (exception != null)
+                                          Log.Error(exception);
+                                      else
+                                          Log.Info($"[{type}] {message}");
+                                  });
+
             Log.Trace("Connect...");
             result = mgr.Connect();
             Log.Trace($"Connect result: {result}");
-
-            mgr.KeepAlive();
 
             if (result != ResultCode.Ok)
                 return result;
 
             // create instance
-            var pump = new ManagerPumpEx(Constants.Server, Constants.Login, Constants.Password)
+            var pump = new ManagerPumpEx(Constants.Server,
+                                         Constants.Login,
+                                         Constants.Password,
+                                         (ctx, type, message, exception) =>
+                                         {
+                                             if (exception != null)
+                                                 Log.Error(exception);
+                                             else
+                                                 Log.Info($"[{type}] {message}");
+                                         }) { };
+
+            pump.Start += sender =>
             {
-                Logger = (ctx, type, message, exception) =>
-                {
-                    if (exception != null)
-                        Log.Error(exception);
-                    else
-                        Log.Info($"[{type}] {message}");
-                }
+                Log.Info("Pumping started");
             };
 
-            pump.Start += sender => { Log.Info("Pumping started"); };
-            pump.Stop += sender => { Log.Info("Pumping stopped"); };
+            pump.Stop += sender =>
+            {
+                Log.Info("Pumping stopped");
+            };
+
             pump.BidAsk += sender =>
             {
                 lock (prices)

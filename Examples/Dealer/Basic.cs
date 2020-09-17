@@ -8,24 +8,21 @@ namespace Examples.Dealer
     public class Basic
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
-        ManagerPump pump;
-        ManagerDealer dealer;
+        ManagerPump                    pump;
+        ManagerDealer                  dealer;
 
         public void Go()
         {
-            pump = new ManagerPump(Constants.Server, Constants.Login, Constants.Password)
-            {
-                Logger = Extensions.LogToConsole
-            };
+            pump = new ManagerPump(Constants.Server, Constants.Login, Constants.Password, Extensions.LogToConsole) { };
 
-            dealer = new ManagerDealer(pump)
-            {
-                Logger = Extensions.LogToConsole
-            };
+            dealer = new ManagerDealer(Constants.Server, Constants.Login, Constants.Password, Extensions.LogToConsole) { };
 
             dealer.Connect();
 
-            dealer.Status += (sender, activate) => { Log.Debug($"ChangeDealingStatus: {activate}"); };
+            dealer.Status += (sender, activate) =>
+            {
+                Log.Debug($"ChangeDealingStatus: {activate}");
+            };
 
             dealer.Request += (sender, req) =>
             {
@@ -47,7 +44,7 @@ namespace Examples.Dealer
                         // or requote
                         req.Prices[0] -= 0.0001;
                         req.Prices[1] += 0.0001;
-                        Log.Debug($"Requote: {sender.Requote(req, DealerConfirmMode.None)}");
+                        Log.Debug($"Requote: {sender.Requote(req)}");
                         break;
 
                     case 3:
