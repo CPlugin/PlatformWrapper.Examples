@@ -1,6 +1,10 @@
-﻿using CPlugin.PlatformWrapper.MetaTrader4;
+﻿using System;
+using System.Linq;
+using CPlugin.Common;
+using CPlugin.PlatformWrapper.MetaTrader4;
 using CPlugin.PlatformWrapper.MetaTrader4.Enums;
 using NLog;
+using CPlugin.PlatformWrapper.MetaTrader4.Classes;
 
 namespace Examples.ManagerDemos
 {
@@ -39,6 +43,20 @@ namespace Examples.ManagerDemos
             var bResult = mgr.UsersRequest(out var users);
             Log.Info($"UsersRequest result: {bResult}, {users.Count} users found");
             // etc
+
+            var serverTime = mgr.ServerTime();
+
+            foreach (var user in users.Values)
+            {
+                if (!mgr.TradesUserHistory(1000, TimeConverter.FromUnixtime(0), serverTime, out var orders))
+                {
+                    Log.Error($"TradesUserHistory({user.Login} failed");
+                    continue;
+                }
+
+                // get all balance orders
+                var balanceOrders = orders.Where(o => o.Value.TradeCommand == TradeCommand.Balance);
+            }
         }
 
         public void Stop()
