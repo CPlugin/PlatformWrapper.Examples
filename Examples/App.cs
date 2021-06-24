@@ -1,45 +1,61 @@
 using System;
+using System.Reflection;
 using CPlugin.PlatformWrapper.MetaTrader4.Enums;
 using Examples.ManagerDemos;
-using NLog;
+using Serilog;
 
 namespace Examples
 {
     public class App
     {
-        static readonly Logger Log = LogManager.GetCurrentClassLogger();
-
-        static int Main(string[] args)
+        static void Main(string[] args)
         {
-            Log.Info("--=[ Started ]=--");
+            var cfg = new LoggerConfiguration().MinimumLevel.Verbose()
+                                               .Enrich.FromLogContext()
+                                               .Enrich.WithProperty("Application", Assembly.GetExecutingAssembly().GetName().Name)
+                                                //.Enrich.WithProperty("Version", ThisAssembly.AssemblyInformationalVersion)
+                                               .WriteTo.Console();
 
-            var res = ResultCode.OkNone;
+            Log.Logger = cfg.CreateLogger();
 
-            // Examples:
-
-            //Pool.Basic100Threads.GetUsers();
-
-            //var d = new Pool.LongRunning();
-            //var d = new Dealer.Basic();
-            var d = new Basic();
-
-            d.Go();
-
-
-            while (true)
+            try
             {
-                if (Console.KeyAvailable)
+                Log.Information("--=[ Started ]=--");
+
+                var res = ResultCode.OkNone;
+
+                // Examples:
+
+                //Pool.Basic100Threads.GetUsers();
+
+                //var d = new Pool.LongRunning();
+                //var d = new Dealer.Basic();
+                var d = new Basic();
+
+                d.Go();
+
+
+                while (true)
                 {
-                    var kki = Console.ReadKey(true);
-                    if (kki.Key == ConsoleKey.Q)
+                    if (Console.KeyAvailable)
                     {
-                        d.Stop();
-                        break;
+                        var kki = Console.ReadKey(true);
+                        if (kki.Key == ConsoleKey.Q)
+                        {
+                            d.Stop();
+                            break;
+                        }
                     }
                 }
             }
-
-            return (int)res;
+            catch (Exception e)
+            {
+                Log.Logger.Error(e, e.Message);
+            }
+            finally
+            {
+                Log.CloseAndFlush();
+            }
         }
     }
 }

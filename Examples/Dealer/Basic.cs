@@ -1,21 +1,39 @@
 using System;
 using CPlugin.PlatformWrapper.MetaTrader4;
 using CPlugin.PlatformWrapper.MetaTrader4.Enums;
-using NLog;
+using Serilog;
 
 namespace Examples.Dealer
 {
     public class Basic
     {
-        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
-        ManagerPump                    pump;
-        ManagerDealer                  dealer;
+        private readonly ILogger Log = Serilog.Log.Logger.ForContext<Basic>();
+        ManagerPump                     pump;
+        ManagerDealer                   dealer;
 
         public void Go()
         {
-            pump = new ManagerPump(Constants.Server, Constants.Login, Constants.Password, Extensions.LogToConsole) { };
+            pump = new ManagerPump(Constants.Server,
+                                   Constants.Login,
+                                   Constants.Password,
+                                   (ctx, type, message, exception) =>
+                                   {
+                                       if (exception != null)
+                                           Log.Error(exception, exception.Message);
+                                       else
+                                           Log.Information($"[{type}] {message}");
+                                   }) { };
 
-            dealer = new ManagerDealer(Constants.Server, Constants.Login, Constants.Password, Extensions.LogToConsole) { };
+            dealer = new ManagerDealer(Constants.Server,
+                                       Constants.Login,
+                                       Constants.Password,
+                                       (ctx, type, message, exception) =>
+                                       {
+                                           if (exception != null)
+                                               Log.Error(exception, exception.Message);
+                                           else
+                                               Log.Information($"[{type}] {message}");
+                                       }) { };
 
             dealer.Connect();
 

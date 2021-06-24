@@ -1,15 +1,15 @@
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using NLog;
+using Serilog;
 
 namespace Examples.Pool
 {
     public class Basic100Threads
     {
-        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
+        private readonly ILogger Log = Serilog.Log.Logger.ForContext<Basic100Threads>();
 
-        public static void GetUsers()
+        public void GetUsers()
         {
             var pool = new CPlugin.PlatformWrapper.MetaTrader4.ManagerPool(Constants.Server,
                                                                            Constants.Login,
@@ -17,9 +17,9 @@ namespace Examples.Pool
                                                                            (ctx, type, message, exception) =>
                                                                            {
                                                                                if (exception != null)
-                                                                                   Log.Error(exception);
+                                                                                   Log.Error(exception, exception.Message);
                                                                                else
-                                                                                   Log.Info($"[{type}] {message}");
+                                                                                   Log.Information($"[{type}] {message}");
                                                                            },
                                                                            maxPollSize: 8) { };
 

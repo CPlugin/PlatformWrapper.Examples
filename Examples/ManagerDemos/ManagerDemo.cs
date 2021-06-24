@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Linq;
 using CPlugin.Common;
+using CPlugin.Common.Extensions;
 using CPlugin.PlatformWrapper.MetaTrader4;
 using CPlugin.PlatformWrapper.MetaTrader4.Enums;
-using NLog;
+using Serilog;
 using CPlugin.PlatformWrapper.MetaTrader4.Classes;
 
 namespace Examples.ManagerDemos
 {
     public class Basic
     {
-        private                   Manager mgr;
-        protected static readonly Logger  Log = LogManager.GetCurrentClassLogger();
+        private          Manager mgr;
+        private readonly ILogger Log = Serilog.Log.Logger.ForContext<Basic>();
 
         public void Go()
         {
@@ -21,34 +22,35 @@ namespace Examples.ManagerDemos
                               (ctx, type, message, exception) =>
                               {
                                   if (exception != null)
-                                      Log.Error(exception);
+                                      Log.Error(exception, exception.Message);
                                   else
-                                      Log.Info($"[{type}] {message}");
-                              }) { };
+                                      Log.Information($"[{type}] {message}");
+                              });
 
-            Log.Info("Connect...");
+            Log.Information("Connect...");
             var result = mgr.Connect();
-            Log.Info($"Connect result: {result}");
+            Log.Information($"Connect result: {result}");
 
             if (result != ResultCode.Ok)
                 return;
 
-            Log.Info("ManagerCommon...");
+            Log.Information("ManagerCommon...");
             result = mgr.ManagerCommon(out var conCommon);
-            Log.Info($"ManagerCommon result: {result}");
+            Log.Information($"ManagerCommon result: {result}");
 
             if (result != ResultCode.Ok)
                 return;
 
             var bResult = mgr.UsersRequest(out var users);
-            Log.Info($"UsersRequest result: {bResult}, {users.Count} users found");
+            Log.Information($"UsersRequest result: {bResult}, {users.Count} users found");
             // etc
 
             var serverTime = mgr.ServerTime();
+            Log.Information("ServerTime: {DateTime}", serverTime);
 
             foreach (var user in users.Values)
             {
-                if (!mgr.TradesUserHistory(1000, TimeConverter.FromUnixtime(0), serverTime, out var orders))
+                if (!mgr.TradesUserHistory(1000, 0.FromUnixtime(), serverTime, out var orders))
                 {
                     Log.Error($"TradesUserHistory({user.Login} failed");
                     continue;
@@ -56,7 +58,13 @@ namespace Examples.ManagerDemos
 
                 // get all balance orders
                 var balanceOrders = orders.Where(o => o.Value.TradeCommand == TradeCommand.Balance);
+
+                break;
             }
+
+            mgr.MarginLevelRequest(1000, out var ml);
+            Log.Information("MarginLevel of '{Login}': {Level}", ml.Login, ml.Level);
+
         }
 
         public void Stop()

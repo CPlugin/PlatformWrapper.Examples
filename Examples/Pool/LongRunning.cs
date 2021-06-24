@@ -2,23 +2,31 @@
 using System.Threading;
 using System.Threading.Tasks;
 using CPlugin.PlatformWrapper.MetaTrader4;
-using NLog;
+using Serilog;
 
 namespace Examples.Pool
 {
     public class LongRunning
     {
-        const                   int              ThreadsCount = 2;
-        readonly                Task[]           _tasks       = new Task[ThreadsCount];
-        readonly                ManualResetEvent _eventStop   = new ManualResetEvent(false);
-        private static readonly Logger           Log          = LogManager.GetCurrentClassLogger();
+        const            int              ThreadsCount = 2;
+        readonly         Task[]           _tasks       = new Task[ThreadsCount];
+        readonly         ManualResetEvent _eventStop   = new ManualResetEvent(false);
+        private readonly ILogger          Log          = Serilog.Log.Logger.ForContext<LongRunning>();
 
         public void Go()
         {
-            Log.Info("Started");
+            Log.Information("Started");
 
-            var poolLog = LogManager.GetLogger("Pool");
-            var pool    = new ManagerPool(Constants.Server, Constants.Login, Constants.Password, (ctx, type, message, exception) => poolLog.Trace($"{type} {message} {exception}")) { };
+            var pool = new ManagerPool(Constants.Server,
+                                       Constants.Login,
+                                       Constants.Password,
+                                       (ctx, type, message, exception) =>
+                                       {
+                                           if (exception != null)
+                                               Log.Error(exception, exception.Message);
+                                           else
+                                               Log.Information($"[{type}] {message}");
+                                       }) { };
 
             var lastOpDateTime = DateTime.MinValue;
             var rnd            = new Random();
@@ -32,7 +40,7 @@ namespace Examples.Pool
                                      {
                                          do
                                          {
-                                             var _log = LogManager.GetLogger("Thread_" + a);
+                                             var _log = Log.ForContext("Thread", a);
                                              try
                                              {
                                                  try
@@ -44,26 +52,26 @@ namespace Examples.Pool
                                                          {
                                                              lastOpDateTime = DateTime.Now;
 
-                                                             _log.Trace("Trying to get data");
+                                                             _log.Debug("Trying to get data");
                                                              var mgr       = v.Data.Value;
                                                              var allUsers  = mgr.UsersRequest();
                                                              var allTrades = mgr.TradesRequest();
                                                              var symbols   = mgr.SymbolsGetAll();
 
-                                                             _log.Info("Fetched {0} users", allUsers.Count);
-                                                             _log.Info("Fetched {0} trades", allTrades.Count);
-                                                             _log.Info("Fetched {0} symbols", symbols.Count);
+                                                             _log.Information("Fetched {0} users", allUsers.Count);
+                                                             _log.Information("Fetched {0} trades", allTrades.Count);
+                                                             _log.Information("Fetched {0} symbols", symbols.Count);
                                                          }
                                                      }
                                                  }
                                                  catch (TimeoutException to)
                                                  {
-                                                     _log.Warn(to.Message);
+                                                     _log.Warning(to.Message);
                                                  }
                                              }
                                              catch (Exception ex)
                                              {
-                                                 _log.Error(ex);
+                                                 _log.Error(ex, ex.Message);
                                              }
                                          } while (false == _eventStop.WaitOne(TimeSpan.FromSeconds(1)));
                                      },
@@ -72,7 +80,7 @@ namespace Examples.Pool
                 _tasks[i].Start();
             }
 
-            Log.Info("All tasks started");
+            Log.Information("All tasks started");
         }
 
         public void Stop()
@@ -80,7 +88,7 @@ namespace Examples.Pool
             _eventStop.Set();
 
             Task.WaitAll(_tasks, TimeSpan.FromSeconds(10));
-            Log.Info("All tasks completed");
+            Log.Information("All tasks completed");
         }
     }
 }

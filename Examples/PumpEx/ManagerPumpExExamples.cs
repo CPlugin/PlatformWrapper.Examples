@@ -4,19 +4,19 @@ using System.Threading;
 using CPlugin.PlatformWrapper.MetaTrader4;
 using CPlugin.PlatformWrapper.MetaTrader4.Classes;
 using CPlugin.PlatformWrapper.MetaTrader4.Enums;
-using NLog;
+using Serilog;
 
 namespace Examples.PumpEx
 {
     public class Basic
     {
-        protected static readonly Logger Log = LogManager.GetCurrentClassLogger();
+        protected readonly ILogger Log = Serilog.Log.Logger.ForContext<Basic>();
 
         /// <summary>
         /// Simple demonstration of connection process
         /// </summary>
         /// <returns></returns>
-        public static ResultCode Connect()
+        public ResultCode Connect()
         {
             ResultCode result;
 
@@ -27,9 +27,9 @@ namespace Examples.PumpEx
                                         (ctx, type, message, exception) =>
                                         {
                                             if (exception != null)
-                                                Log.Error(exception);
+                                                Log.Error(exception, exception.Message);
                                             else
-                                                Log.Info($"[{type}] {message}");
+                                                Log.Information($"[{type}] {message}");
                                         })
             {
                 PumpingFlags = PumpingFlags.HideNews | PumpingFlags.HideMail,
@@ -37,18 +37,18 @@ namespace Examples.PumpEx
 
             mgr.Start += sender =>
             {
-                Log.Info("Pumping started");
+                Log.Information("Pumping started");
             };
 
             mgr.Stop += sender =>
             {
-                Log.Info("Pumping stopped");
+                Log.Information("Pumping stopped");
             };
 
 
-            Log.Trace("Connect...");
+            Log.Debug("Connect...");
             result = mgr.Connect();
-            Log.Trace($"Connect result: {result}");
+            Log.Debug($"Connect result: {result}");
 
             if (result != ResultCode.Ok)
                 return result;
@@ -68,9 +68,9 @@ namespace Examples.PumpEx
             // simulate long running
             Thread.Sleep(5000);
 
-            Log.Trace("Disconnect...");
+            Log.Debug("Disconnect...");
             result = mgr.Disconnect();
-            Log.Trace($"Disconnect result: {result}");
+            Log.Debug($"Disconnect result: {result}");
 
             return result;
         }
@@ -79,7 +79,7 @@ namespace Examples.PumpEx
         /// Demonstration of new order opening process using regular and pumping connection simultaneously
         /// </summary>
         /// <returns></returns>
-        public static ResultCode OpenTrade()
+        public ResultCode OpenTrade()
         {
             ResultCode result;
 
@@ -91,14 +91,14 @@ namespace Examples.PumpEx
                                   (ctx, type, message, exception) =>
                                   {
                                       if (exception != null)
-                                          Log.Error(exception);
+                                          Log.Error(exception, exception.Message);
                                       else
-                                          Log.Info($"[{type}] {message}");
+                                          Log.Information($"[{type}] {message}");
                                   });
 
-            Log.Trace("Connect...");
+            Log.Debug("Connect...");
             result = mgr.Connect();
-            Log.Trace($"Connect result: {result}");
+            Log.Debug($"Connect result: {result}");
 
             if (result != ResultCode.Ok)
                 return result;
@@ -110,19 +110,19 @@ namespace Examples.PumpEx
                                          (ctx, type, message, exception) =>
                                          {
                                              if (exception != null)
-                                                 Log.Error(exception);
+                                                 Log.Error(exception, exception.Message);
                                              else
-                                                 Log.Info($"[{type}] {message}");
+                                                 Log.Information($"[{type}] {message}");
                                          }) { };
 
             pump.Start += sender =>
             {
-                Log.Info("Pumping started");
+                Log.Information("Pumping started");
             };
 
             pump.Stop += sender =>
             {
-                Log.Info("Pumping stopped");
+                Log.Information("Pumping stopped");
             };
 
             pump.BidAsk += sender =>
@@ -140,9 +140,9 @@ namespace Examples.PumpEx
             };
 
 
-            Log.Trace("Connect...");
+            Log.Debug("Connect...");
             result = pump.Connect();
-            Log.Trace($"Connect result: {result}");
+            Log.Debug($"Connect result: {result}");
 
             if (result != ResultCode.Ok)
                 return result;
@@ -175,22 +175,22 @@ namespace Examples.PumpEx
                     TradeTransactionType = TradeTransactionType.BrOpen
                 };
 
-                Log.Trace("TradeTransaction...");
+                Log.Debug("TradeTransaction...");
                 result = mgr.TradeTransaction(ref tti);
-                Log.Trace($"TradeTransaction result: {result}");
+                Log.Debug($"TradeTransaction result: {result}");
 
                 if (result != ResultCode.Ok)
                     return result;
             }
             finally
             {
-                Log.Trace("Disconnect...");
+                Log.Debug("Disconnect...");
                 result = pump.Disconnect();
-                Log.Trace($"Disconnect result: {result}");
+                Log.Debug($"Disconnect result: {result}");
 
-                Log.Trace("Disconnect...");
+                Log.Debug("Disconnect...");
                 result = mgr.Disconnect();
-                Log.Trace($"Disconnect result: {result}");
+                Log.Debug($"Disconnect result: {result}");
             }
 
             return result;
