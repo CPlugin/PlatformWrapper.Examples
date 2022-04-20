@@ -42,35 +42,40 @@ namespace Examples.Dealer
                 Log.Debug($"ChangeDealingStatus: {activate}");
             };
 
-            dealer.Request += (sender, req) =>
+            dealer.NewRequest += () =>
             {
+                ResultCode res;
+                var        dealerRequestGet = dealer.DealerRequestGet(out var req);
+
                 Log.Debug($"Request: #{req.Id} '{req.Login}' {req.Trade}");
 
                 switch (new Random().Next(0, 4))
                 {
                     case 0:
                         //depends on logic do:
-                        Log.Debug($"Confirm: {sender.Confirm(req)}");
+                        Log.Debug($"Confirm: {dealer.Confirm(ref req)}");
                         break;
 
                     case 1:
                         // or reject
-                        Log.Debug($"Reject: {sender.Reject(req)}");
+                        Log.Debug($"Reject: {dealer.Reject(req)}");
                         break;
 
                     case 2:
                         // or requote
                         req.Prices[0] -= 0.0001;
                         req.Prices[1] += 0.0001;
-                        Log.Debug($"Requote: {sender.Requote(req)}");
+                        Log.Debug($"Requote: {dealer.Requote(ref req)}");
                         break;
 
                     case 3:
 
                         // bypass request back to queue
-                        Log.Debug($"Reset: {sender.Reset(req)}");
+                        Log.Debug($"Reset: {dealer.Reset(req)}");
                         break;
                 }
+
+                return true;
             };
         }
 

@@ -16,7 +16,7 @@ namespace Examples.PumpEx
         /// Simple demonstration of connection process
         /// </summary>
         /// <returns></returns>
-        public ResultCode Connect()
+        public ResultCode Go()
         {
             ResultCode result;
 
@@ -45,6 +45,11 @@ namespace Examples.PumpEx
                 Log.Information("Pumping stopped");
             };
 
+            mgr.BidAsk += pump =>
+            {
+                var quotes = pump.SymbolInfoUpdated();
+                Log.Debug("{Count} quotes received", quotes.Count);
+            };
 
             Log.Debug("Connect...");
             result = mgr.Connect();

@@ -31,6 +31,7 @@ namespace Examples
                 //var d = new Pool.LongRunning();
                 //var d = new Dealer.Basic();
                 var d = new Basic();
+                //var d = new Examples.PumpEx.Basic();
 
                 d.Go();
 
